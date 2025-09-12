@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { CssBaseline, Box } from '@mui/material';
+import { CssBaseline } from '@mui/material';
 import TripPlanner from './components/TripPlanner';
 import TripResults from './components/TripResults';
 import type { TripResponse } from './utils/types';
+import './styles/custom.css';
 
 const theme = createTheme({
   palette: {
@@ -43,13 +44,13 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ minHeight: '100vh', width: '100%' }}>
+      <div style={{ minHeight: '100vh', width: '100%' }}>
         {tripData ? (
           <TripResults tripData={tripData} onBack={handleBackToPlanner} />
         ) : (
           <TripPlanner onTripPlanned={handleTripPlanned} />
         )}
-      </Box>
+      </div>
     </ThemeProvider>
   );
 }

@@ -5,7 +5,6 @@ import {
   Typography,
   TextField,
   Button,
-  Box,
   Alert,
   CircularProgress,
   Stepper,
@@ -121,43 +120,39 @@ const TripPlanner: React.FC<TripPlannerProps> = ({ onTripPlanned }) => {
   ];
 
   return (
-    <Box sx={{ 
+    <div style={{ 
       minHeight: '100vh',
-      width: '100%',
-      bgcolor: 'background.default',
-      py: 2,
+      width: '100vw',
+      backgroundColor: '#f5f5f5',
+      padding: '16px 0',
     }}>
-      <Container 
-        maxWidth={false} 
-        sx={{ 
-          px: { xs: 2, sm: 3, md: 4, lg: 5, xl: 6 },
-          width: '100%',
-          mx: 0
-        }}
-      >
+      <div style={{ 
+        padding: '0 16px',
+        width: '98%',
+        margin: 0,
+      }} className="responsive-container">
         {/* Header */}
         <Paper elevation={2} sx={{ p: 4, mb: 4, background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)', color: 'white' }}>
-          <Box display="flex" alignItems="center" mb={2}>
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
             <LocalShipping sx={{ fontSize: 40, mr: 2 }} />
             <Typography variant="h3" fontWeight="bold">
               ELD Trip Planner
             </Typography>
-          </Box>
+          </div>
           <Typography variant="h6" sx={{ opacity: 0.9 }}>
             Professional trip planning with HOS compliance for commercial drivers
           </Typography>
         </Paper>
 
-        <Box display="flex" gap={4} flexDirection={{ xs: 'column', lg: 'row' }}>
         {/* Main Form */}
-        <Box flex={{ xs: 1, lg: 2 }}>
+        <div className="mb-4">
           <Paper elevation={3} sx={{ p: 4 }}>
             <Typography variant="h5" gutterBottom color="primary" fontWeight="bold">
               Plan Your Trip
             </Typography>
 
             {loading && (
-              <Box mb={3}>
+              <div style={{ marginBottom: '24px' }}>
                 <Stepper activeStep={activeStep} alternativeLabel>
                   {steps.map((label) => (
                     <Step key={label}>
@@ -165,13 +160,13 @@ const TripPlanner: React.FC<TripPlannerProps> = ({ onTripPlanned }) => {
                     </Step>
                   ))}
                 </Stepper>
-                <Box display="flex" justifyContent="center" mt={3}>
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
                   <CircularProgress size={40} />
                   <Typography ml={2} variant="body1" color="text.secondary">
                     {steps[activeStep]}...
                   </Typography>
-                </Box>
-              </Box>
+                </div>
+              </div>
             )}
 
             {error && (
@@ -181,7 +176,7 @@ const TripPlanner: React.FC<TripPlannerProps> = ({ onTripPlanned }) => {
             )}
 
             <form onSubmit={handleSubmit}>
-              <Box display="flex" flexDirection="column" gap={3}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                 <FormControl fullWidth required disabled={loading}>
                   <InputLabel id="current-location-label">Current Location</InputLabel>
                   <Select
@@ -198,7 +193,7 @@ const TripPlanner: React.FC<TripPlannerProps> = ({ onTripPlanned }) => {
                   </Select>
                 </FormControl>
 
-                <Box display="flex" gap={2} flexDirection={{ xs: 'column', md: 'row' }}>
+                <div className="form-row">
                   <FormControl fullWidth required disabled={loading}>
                     <InputLabel id="pickup-location-label">Pickup Location</InputLabel>
                     <Select
@@ -230,7 +225,7 @@ const TripPlanner: React.FC<TripPlannerProps> = ({ onTripPlanned }) => {
                       ))}
                     </Select>
                   </FormControl>
-                </Box>
+                </div>
 
                 <TextField
                   fullWidth
@@ -257,55 +252,59 @@ const TripPlanner: React.FC<TripPlannerProps> = ({ onTripPlanned }) => {
                 >
                   {loading ? 'Planning Trip...' : 'Plan Trip'}
                 </Button>
-              </Box>
+              </div>
             </form>
           </Paper>
-        </Box>
+        </div>
 
-        {/* Features Panel */}
-        <Box flex={{ xs: 1, lg: 1 }}>
-          <Box display="flex" flexDirection="column" gap={3}>
-            <Typography variant="h6" fontWeight="bold" color="primary">
-              Key Features
-            </Typography>
-            
+        {/* Key Features - 4 columns below the form */}
+        <div className="mb-4">
+          <Typography variant="h6" fontWeight="bold" color="primary" gutterBottom>
+            Key Features
+          </Typography>
+          
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
+            gap: '16px',
+            marginBottom: '24px'
+          }}>
             {features.map((feature, index) => (
               <Card key={index} elevation={2}>
                 <CardContent>
-                  <Box display="flex" alignItems="center" mb={1}>
+                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                     {feature.icon}
                     <Typography variant="h6" ml={1} fontWeight="bold">
                       {feature.title}
                     </Typography>
-                  </Box>
+                  </div>
                   <Typography variant="body2" color="text.secondary">
                     {feature.description}
                   </Typography>
                 </CardContent>
               </Card>
             ))}
+          </div>
 
-            <Card elevation={2} sx={{ background: 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)' }}>
-              <CardContent>
-                <Typography variant="h6" fontWeight="bold" gutterBottom>
-                  HOS Compliance Check
-                </Typography>
-                <Typography variant="body2" paragraph>
-                  Our system automatically validates your trip against FMCSA Hours of Service regulations:
-                </Typography>
-                <Box component="ul" sx={{ pl: 2, m: 0 }}>
-                  <Typography component="li" variant="body2">11-hour driving limit</Typography>
-                  <Typography component="li" variant="body2">14-hour duty limit</Typography>
-                  <Typography component="li" variant="body2">30-minute break requirements</Typography>
-                  <Typography component="li" variant="body2">70-hour/8-day cycle limits</Typography>
-                </Box>
-              </CardContent>
-            </Card>
-          </Box>
-        </Box>
-        </Box>
-      </Container>
-    </Box>
+          <Card elevation={2} sx={{ background: 'linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)' }}>
+            <CardContent>
+              <Typography variant="h6" fontWeight="bold" gutterBottom>
+                HOS Compliance Check
+              </Typography>
+              <Typography variant="body2" paragraph>
+                Our system automatically validates your trip against FMCSA Hours of Service regulations:
+              </Typography>
+              <ul style={{ paddingLeft: '16px', margin: 0 }}>
+                <Typography component="li" variant="body2">11-hour driving limit</Typography>
+                <Typography component="li" variant="body2">14-hour duty limit</Typography>
+                <Typography component="li" variant="body2">30-minute break requirements</Typography>
+                <Typography component="li" variant="body2">70-hour/8-day cycle limits</Typography>
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
   );
 };
 
