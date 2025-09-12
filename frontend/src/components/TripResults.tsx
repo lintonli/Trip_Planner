@@ -117,7 +117,7 @@ const TripResults: React.FC<TripResultsProps> = ({ tripData, onBack }) => {
 
         {hos_compliance.is_compliant ? (
           <Alert severity="success" sx={{ mb: 2 }}>
-            ✅ Trip is fully compliant with FMCSA Hours of Service regulations
+             Trip is fully compliant with FMCSA Hours of Service regulations
           </Alert>
         ) : (
           <Alert severity="warning" sx={{ mb: 2 }}>
