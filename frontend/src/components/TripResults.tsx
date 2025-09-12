@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   Paper,
   Typography,
@@ -24,12 +25,52 @@ import type { TripResponse } from '../utils/types';
 import { truckerAPI } from '../services';
 import RouteMap from './RouteMap';
 
-interface TripResultsProps {
-  tripData: TripResponse;
-  onBack: () => void;
-}
+const TripResults: React.FC = () => {
+  const { tripId } = useParams<{ tripId: string }>();
+  const navigate = useNavigate();
+  const [tripData, setTripData] = useState<TripResponse | null>(null);
+  const [loading, setLoading] = useState(true);
 
-const TripResults: React.FC<TripResultsProps> = ({ tripData, onBack }) => {
+  useEffect(() => {
+    // Load trip data from localStorage
+    const storedTripData = localStorage.getItem('tripData');
+    if (storedTripData) {
+      try {
+        const data = JSON.parse(storedTripData);
+        setTripData(data);
+      } catch (error) {
+        console.error('Error parsing trip data from localStorage:', error);
+        navigate('/'); // Redirect to home if data is invalid
+      }
+    } else {
+      // If no data in localStorage, redirect to home
+      navigate('/');
+    }
+    setLoading(false);
+  }, [tripId, navigate]);
+
+  const handleBack = () => {
+    navigate('/');
+  };
+
+  if (loading) {
+    return (
+      <Container maxWidth="lg" style={{ padding: '20px', textAlign: 'center' }}>
+        <Typography variant="h6">Loading trip results...</Typography>
+      </Container>
+    );
+  }
+
+  if (!tripData) {
+    return (
+      <Container maxWidth="lg" style={{ padding: '20px', textAlign: 'center' }}>
+        <Typography variant="h6">No trip data found. Please plan a new trip.</Typography>
+        <Button onClick={handleBack} variant="contained" style={{ marginTop: '20px' }}>
+          Back to Trip Planner
+        </Button>
+      </Container>
+    );
+  }
   const { trip, route, schedule, hos_compliance } = tripData;
 
   const formatTime = (hours: number): string => {
@@ -86,7 +127,7 @@ const TripResults: React.FC<TripResultsProps> = ({ tripData, onBack }) => {
             </div>
             <Button 
               variant="outlined" 
-              onClick={onBack}
+              onClick={handleBack}
               sx={{ color: 'white', borderColor: 'white', '&:hover': { borderColor: 'white', backgroundColor: 'rgba(255,255,255,0.1)' } }}
             >
               Plan New Trip

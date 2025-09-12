@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
-  Container,
   Paper,
   Typography,
   TextField,
@@ -19,14 +19,11 @@ import {
 } from '@mui/material';
 import { LocalShipping, Route, Speed, Schedule, Security } from '@mui/icons-material';
 import { truckerAPI } from '../services';
-import type { TripRequest, TripResponse } from '../utils/types';
+import type { TripRequest } from '../utils/types';
 import { SORTED_LOCATIONS } from '../utils/locations';
 
-interface TripPlannerProps {
-  onTripPlanned: (tripResponse: TripResponse) => void;
-}
-
-const TripPlanner: React.FC<TripPlannerProps> = ({ onTripPlanned }) => {
+const TripPlanner: React.FC = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<TripRequest>({
     current_location: '',
     pickup_location: '',
@@ -85,8 +82,12 @@ const TripPlanner: React.FC<TripPlannerProps> = ({ onTripPlanned }) => {
       clearInterval(stepInterval);
       setActiveStep(steps.length - 1);
       
+      // Store trip data in localStorage for the results page
+      localStorage.setItem('tripData', JSON.stringify(response));
+      
       setTimeout(() => {
-        onTripPlanned(response);
+        // Navigate to results page with trip ID
+        navigate(`/results/${response.trip.id}`);
       }, 500);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to plan trip');

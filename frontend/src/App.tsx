@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import TripPlanner from './components/TripPlanner';
 import TripResults from './components/TripResults';
-import type { TripResponse } from './utils/types';
 import './styles/custom.css';
 
 const theme = createTheme({
@@ -18,39 +17,17 @@ const theme = createTheme({
 });
 
 function App() {
-  const [tripData, setTripData] = useState<TripResponse | null>(() => {
-    // Initialize from localStorage if available
-    const saved = localStorage.getItem('tripData');
-    return saved ? JSON.parse(saved) : null;
-  });
-
-  // Save to localStorage whenever tripData changes
-  useEffect(() => {
-    if (tripData) {
-      localStorage.setItem('tripData', JSON.stringify(tripData));
-    } else {
-      localStorage.removeItem('tripData');
-    }
-  }, [tripData]);
-
-  const handleTripPlanned = (response: TripResponse) => {
-    setTripData(response);
-  };
-
-  const handleBackToPlanner = () => {
-    setTripData(null);
-  };
-
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <div style={{ minHeight: '100vh', width: '100%' }}>
-        {tripData ? (
-          <TripResults tripData={tripData} onBack={handleBackToPlanner} />
-        ) : (
-          <TripPlanner onTripPlanned={handleTripPlanned} />
-        )}
-      </div>
+      <BrowserRouter>
+        <div style={{ minHeight: '100vh', width: '100%' }}>
+          <Routes>
+            <Route path="/" element={<TripPlanner />} />
+            <Route path="/results/:tripId" element={<TripResults />} />
+          </Routes>
+        </div>
+      </BrowserRouter>
     </ThemeProvider>
   );
 }
