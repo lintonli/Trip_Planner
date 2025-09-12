@@ -10,37 +10,6 @@ from .serializers import (
 from .services.route_service import RouteService
 from .services.hos_service import HOSComplianceService
 from datetime import datetime, date, time
-import logging
-
-logger = logging.getLogger(__name__)
-
-@api_view(['POST'])
-def test_geocode(request):
-    """
-    Test geocoding endpoint for debugging
-    """
-    location = request.data.get('location')
-    if not location:
-        return Response({'error': 'Location parameter required'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    route_service = RouteService()
-    coords = route_service.geocode_location(location)
-    
-    if coords:
-        return Response({
-            'location': location,
-            'coordinates': {
-                'latitude': coords[0],
-                'longitude': coords[1]
-            },
-            'success': True
-        })
-    else:
-        return Response({
-            'location': location,
-            'error': 'Could not geocode location',
-            'success': False
-        }, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def plan_trip(request):
@@ -64,19 +33,9 @@ def plan_trip(request):
         pickup_coords = route_service.geocode_location(trip.pickup_location)
         dropoff_coords = route_service.geocode_location(trip.dropoff_location)
         
-        # Check which locations failed geocoding
-        failed_locations = []
-        if not current_coords:
-            failed_locations.append(f"current location '{trip.current_location}'")
-        if not pickup_coords:
-            failed_locations.append(f"pickup location '{trip.pickup_location}'")
-        if not dropoff_coords:
-            failed_locations.append(f"dropoff location '{trip.dropoff_location}'")
-            
-        if failed_locations:
-            error_msg = f"Could not geocode: {', '.join(failed_locations)}. Please use specific city and state format (e.g., 'Los Angeles, CA')"
+        if not all([current_coords, pickup_coords, dropoff_coords]):
             return Response(
-                {'error': error_msg}, 
+                {'error': 'Could not geocode one or more locations'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -86,7 +45,7 @@ def plan_trip(request):
         
         if not route_to_pickup or not route_to_dropoff:
             return Response(
-                {'error': 'Could not calculate route between the specified locations'}, 
+                {'error': 'Could not calculate route'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
         

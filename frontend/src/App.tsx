@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { CssBaseline, Container } from '@mui/material';
+import { CssBaseline, Box } from '@mui/material';
 import TripPlanner from './components/TripPlanner';
 import TripResults from './components/TripResults';
 import type { TripResponse } from './utils/types';
@@ -30,13 +30,13 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Container maxWidth="xl" sx={{ minHeight: '100vh', py: 2 }}>
+      <Box sx={{ minHeight: '100vh', width: '100%' }}>
         {tripData ? (
           <TripResults tripData={tripData} onBack={handleBackToPlanner} />
         ) : (
           <TripPlanner onTripPlanned={handleTripPlanned} />
         )}
-      </Container>
+      </Box>
     </ThemeProvider>
   );
 }

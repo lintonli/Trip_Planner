@@ -12,6 +12,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Container,
 } from '@mui/material';
 import {
   Route,
@@ -25,6 +26,7 @@ import {
   Download,
 } from '@mui/icons-material';
 import type { TripResponse } from '../utils/types';
+import { truckerAPI } from '../services';
 import RouteMap from './RouteMap';
 
 interface TripResultsProps {
@@ -43,34 +45,62 @@ const TripResults: React.FC<TripResultsProps> = ({ tripData, onBack }) => {
 
   const handleDownloadPDF = async (date: string) => {
     try {
-      console.log(`Downloading PDF for ${date}`);
+      const blob = await truckerAPI.getDailyLogPDF(trip.id, date);
+      
+      // Create a URL for the blob
+      const url = window.URL.createObjectURL(blob);
+      
+      // Create a temporary anchor element and trigger download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `daily-log-${date}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error downloading PDF:', error);
+      alert('Failed to download PDF. Please try again.');
     }
   };
 
   return (
-    <Box sx={{ mt: 4 }}>
-      {/* Header */}
-      <Paper elevation={3} sx={{ p: 3, mb: 4, background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)', color: 'white' }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Box>
-            <Typography variant="h4" fontWeight="bold" gutterBottom>
-              Trip Plan Complete
-            </Typography>
-            <Typography variant="h6">
-              {trip.pickup_location} → {trip.dropoff_location}
-            </Typography>
+    <Box sx={{ 
+      minHeight: '100vh',
+      width: '100%',
+      bgcolor: 'background.default',
+      py: 2,
+    }}>
+      <Container 
+        maxWidth={false} 
+        sx={{ 
+          px: { xs: 2, sm: 3, md: 4, lg: 5, xl: 6 },
+          width: '100%',
+          mx: 0
+        }}
+      >
+        {/* Header */}
+        <Paper elevation={3} sx={{ p: 3, mb: 4, background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)', color: 'white' }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Box>
+              <Typography variant="h4" fontWeight="bold" gutterBottom>
+                Trip Plan Complete
+              </Typography>
+              <Typography variant="h6">
+                {trip.pickup_location} → {trip.dropoff_location}
+              </Typography>
+            </Box>
+            <Button 
+              variant="outlined" 
+              onClick={onBack}
+              sx={{ color: 'white', borderColor: 'white', '&:hover': { borderColor: 'white', backgroundColor: 'rgba(255,255,255,0.1)' } }}
+            >
+              Plan New Trip
+            </Button>
           </Box>
-          <Button 
-            variant="outlined" 
-            onClick={onBack}
-            sx={{ color: 'white', borderColor: 'white', '&:hover': { borderColor: 'white', backgroundColor: 'rgba(255,255,255,0.1)' } }}
-          >
-            Plan New Trip
-          </Button>
-        </Box>
-      </Paper>
+        </Paper>
 
       {/* HOS Compliance Status */}
       <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
@@ -119,10 +149,10 @@ const TripResults: React.FC<TripResultsProps> = ({ tripData, onBack }) => {
       </Paper>
 
       {/* Trip Summary and Daily Logs */}
-      <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} gap={4} mb={4}>
+      <Box display="flex" flexDirection={{ xs: 'column', lg: 'row' }} gap={4} mb={4}>
         {/* Trip Summary */}
-        <Box flex="0 0 auto" width={{ xs: '100%', md: '400px' }}>
-          <Card elevation={3}>
+        <Box flex={{ xs: '1', lg: '0 0 400px' }} width={{ xs: '100%', lg: '400px' }}>
+          <Card elevation={3} sx={{ height: 'fit-content' }}>
             <CardContent>
               <Typography variant="h6" gutterBottom fontWeight="bold" color="primary">
                 <Route sx={{ mr: 1, verticalAlign: 'middle' }} />
@@ -184,9 +214,16 @@ const TripResults: React.FC<TripResultsProps> = ({ tripData, onBack }) => {
               </Typography>
               
               {schedule.daily_logs && schedule.daily_logs.length > 0 ? (
-                schedule.daily_logs.map((log, index) => (
-                  <Box key={index} mb={2}>
-                    <Paper variant="outlined" sx={{ p: 2 }}>
+                <Box 
+                  display="grid" 
+                  gridTemplateColumns={{ 
+                    xs: '1fr', 
+                    sm: 'repeat(auto-fit, minmax(400px, 1fr))' 
+                  }} 
+                  gap={2}
+                >
+                  {schedule.daily_logs.map((log, index) => (
+                    <Paper key={index} variant="outlined" sx={{ p: 2 }}>
                       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                         <Typography variant="subtitle1" fontWeight="bold">
                           Day {log.day_number} - {new Date(log.date).toLocaleDateString()}
@@ -201,7 +238,7 @@ const TripResults: React.FC<TripResultsProps> = ({ tripData, onBack }) => {
                         </Button>
                       </Box>
                       
-                      <Box display="flex" flexWrap="wrap" gap={1}>
+                      <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={1}>
                         <Box>
                           <Typography variant="body2" color="text.secondary">Driving</Typography>
                           <Chip 
@@ -236,8 +273,8 @@ const TripResults: React.FC<TripResultsProps> = ({ tripData, onBack }) => {
                         </Box>
                       </Box>
                     </Paper>
-                  </Box>
-                ))
+                  ))}
+                </Box>
               ) : (
                 <Typography color="text.secondary">
                   No daily logs generated for this trip.
@@ -255,62 +292,67 @@ const TripResults: React.FC<TripResultsProps> = ({ tripData, onBack }) => {
 
       {/* Route Details */}
       <Paper elevation={3} sx={{ p: 3 }}>
-        <Typography variant="h6" gutterBottom fontWeight="bold" color="primary">
+        <Typography variant="h6" gutterBottom fontWeight="bold" color="primary" mb={3}>
           Route Breakdown
         </Typography>
         
-        <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} gap={3}>
-          <Box flex="1">
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                  Current → Pickup
-                </Typography>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  {trip.current_location} → {trip.pickup_location}
-                </Typography>
-                <Box display="flex" gap={1} mt={1}>
-                  <Chip 
-                    label={`${route.to_pickup.distance.toFixed(1)} miles`} 
-                    size="small" 
-                    color="primary" 
-                  />
-                  <Chip 
-                    label={formatTime(route.to_pickup.duration)} 
-                    size="small" 
-                    color="secondary" 
-                  />
-                </Box>
-              </CardContent>
-            </Card>
-          </Box>
+        <Box 
+          display="grid" 
+          gridTemplateColumns={{ 
+            xs: '1fr', 
+            md: 'repeat(2, 1fr)',
+            lg: 'repeat(2, 1fr)'
+          }} 
+          gap={3}
+        >
+          <Card variant="outlined" sx={{ height: 'fit-content' }}>
+            <CardContent>
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Current → Pickup
+              </Typography>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                {trip.current_location} → {trip.pickup_location}
+              </Typography>
+              <Box display="flex" gap={1} mt={2} flexWrap="wrap">
+                <Chip 
+                  label={`${route.to_pickup.distance.toFixed(1)} miles`} 
+                  size="small" 
+                  color="primary" 
+                />
+                <Chip 
+                  label={formatTime(route.to_pickup.duration)} 
+                  size="small" 
+                  color="secondary" 
+                />
+              </Box>
+            </CardContent>
+          </Card>
           
-          <Box flex="1">
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                  Pickup → Dropoff
-                </Typography>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  {trip.pickup_location} → {trip.dropoff_location}
-                </Typography>
-                <Box display="flex" gap={1} mt={1}>
-                  <Chip 
-                    label={`${route.to_dropoff.distance.toFixed(1)} miles`} 
-                    size="small" 
-                    color="primary" 
-                  />
-                  <Chip 
-                    label={formatTime(route.to_dropoff.duration)} 
-                    size="small" 
-                    color="secondary" 
-                  />
-                </Box>
-              </CardContent>
-            </Card>
-          </Box>
+          <Card variant="outlined" sx={{ height: 'fit-content' }}>
+            <CardContent>
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Pickup → Dropoff
+              </Typography>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                {trip.pickup_location} → {trip.dropoff_location}
+              </Typography>
+              <Box display="flex" gap={1} mt={2} flexWrap="wrap">
+                <Chip 
+                  label={`${route.to_dropoff.distance.toFixed(1)} miles`} 
+                  size="small" 
+                  color="primary" 
+                />
+                <Chip 
+                  label={formatTime(route.to_dropoff.duration)} 
+                  size="small" 
+                  color="secondary" 
+                />
+              </Box>
+            </CardContent>
+          </Card>
         </Box>
       </Paper>
+      </Container>
     </Box>
   );
 };

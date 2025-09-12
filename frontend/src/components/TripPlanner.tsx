@@ -13,10 +13,15 @@ import {
   StepLabel,
   Card,
   CardContent,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import { LocalShipping, Route, Speed, Schedule, Security } from '@mui/icons-material';
 import { truckerAPI } from '../services';
 import type { TripRequest, TripResponse } from '../utils/types';
+import { SORTED_LOCATIONS } from '../utils/locations';
 
 interface TripPlannerProps {
   onTripPlanned: (tripResponse: TripResponse) => void;
@@ -41,6 +46,13 @@ const TripPlanner: React.FC<TripPlannerProps> = ({ onTripPlanned }) => {
     'Generating daily logs',
     'Finalizing trip plan'
   ];
+
+  const handleLocationChange = (field: keyof Pick<TripRequest, 'current_location' | 'pickup_location' | 'dropoff_location'>) => (
+    event: any
+  ) => {
+    const value = event.target.value;
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
   const handleInputChange = (field: keyof TripRequest) => (
     event: React.ChangeEvent<HTMLInputElement>
@@ -109,21 +121,34 @@ const TripPlanner: React.FC<TripPlannerProps> = ({ onTripPlanned }) => {
   ];
 
   return (
-    <Container maxWidth="xl">
-      {/* Header */}
-      <Paper elevation={2} sx={{ p: 4, mb: 4, background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)', color: 'white' }}>
-        <Box display="flex" alignItems="center" mb={2}>
-          <LocalShipping sx={{ fontSize: 40, mr: 2 }} />
-          <Typography variant="h3" fontWeight="bold">
-            ELD Trip Planner
+    <Box sx={{ 
+      minHeight: '100vh',
+      width: '100%',
+      bgcolor: 'background.default',
+      py: 2,
+    }}>
+      <Container 
+        maxWidth={false} 
+        sx={{ 
+          px: { xs: 2, sm: 3, md: 4, lg: 5, xl: 6 },
+          width: '100%',
+          mx: 0
+        }}
+      >
+        {/* Header */}
+        <Paper elevation={2} sx={{ p: 4, mb: 4, background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)', color: 'white' }}>
+          <Box display="flex" alignItems="center" mb={2}>
+            <LocalShipping sx={{ fontSize: 40, mr: 2 }} />
+            <Typography variant="h3" fontWeight="bold">
+              ELD Trip Planner
+            </Typography>
+          </Box>
+          <Typography variant="h6" sx={{ opacity: 0.9 }}>
+            Professional trip planning with HOS compliance for commercial drivers
           </Typography>
-        </Box>
-        <Typography variant="h6" sx={{ opacity: 0.9 }}>
-          Professional trip planning with HOS compliance for commercial drivers
-        </Typography>
-      </Paper>
+        </Paper>
 
-      <Box display="flex" gap={4} flexDirection={{ xs: 'column', lg: 'row' }}>
+        <Box display="flex" gap={4} flexDirection={{ xs: 'column', lg: 'row' }}>
         {/* Main Form */}
         <Box flex={{ xs: 1, lg: 2 }}>
           <Paper elevation={3} sx={{ p: 4 }}>
@@ -157,36 +182,54 @@ const TripPlanner: React.FC<TripPlannerProps> = ({ onTripPlanned }) => {
 
             <form onSubmit={handleSubmit}>
               <Box display="flex" flexDirection="column" gap={3}>
-                <TextField
-                  fullWidth
-                  label="Current Location"
-                  value={formData.current_location}
-                  onChange={handleInputChange('current_location')}
-                  placeholder="e.g., Los Angeles, CA"
-                  required
-                  disabled={loading}
-                />
+                <FormControl fullWidth required disabled={loading}>
+                  <InputLabel id="current-location-label">Current Location</InputLabel>
+                  <Select
+                    labelId="current-location-label"
+                    value={formData.current_location}
+                    label="Current Location"
+                    onChange={handleLocationChange('current_location')}
+                  >
+                    {SORTED_LOCATIONS.map((location) => (
+                      <MenuItem key={location.value} value={location.label}>
+                        {location.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
                 <Box display="flex" gap={2} flexDirection={{ xs: 'column', md: 'row' }}>
-                  <TextField
-                    fullWidth
-                    label="Pickup Location"
-                    value={formData.pickup_location}
-                    onChange={handleInputChange('pickup_location')}
-                    placeholder="e.g., Phoenix, AZ"
-                    required
-                    disabled={loading}
-                  />
+                  <FormControl fullWidth required disabled={loading}>
+                    <InputLabel id="pickup-location-label">Pickup Location</InputLabel>
+                    <Select
+                      labelId="pickup-location-label"
+                      value={formData.pickup_location}
+                      label="Pickup Location"
+                      onChange={handleLocationChange('pickup_location')}
+                    >
+                      {SORTED_LOCATIONS.map((location) => (
+                        <MenuItem key={location.value} value={location.label}>
+                          {location.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
 
-                  <TextField
-                    fullWidth
-                    label="Dropoff Location"
-                    value={formData.dropoff_location}
-                    onChange={handleInputChange('dropoff_location')}
-                    placeholder="e.g., Denver, CO"
-                    required
-                    disabled={loading}
-                  />
+                  <FormControl fullWidth required disabled={loading}>
+                    <InputLabel id="dropoff-location-label">Dropoff Location</InputLabel>
+                    <Select
+                      labelId="dropoff-location-label"
+                      value={formData.dropoff_location}
+                      label="Dropoff Location"
+                      onChange={handleLocationChange('dropoff_location')}
+                    >
+                      {SORTED_LOCATIONS.map((location) => (
+                        <MenuItem key={location.value} value={location.label}>
+                          {location.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                 </Box>
 
                 <TextField
@@ -260,8 +303,9 @@ const TripPlanner: React.FC<TripPlannerProps> = ({ onTripPlanned }) => {
             </Card>
           </Box>
         </Box>
-      </Box>
-    </Container>
+        </Box>
+      </Container>
+    </Box>
   );
 };
 
