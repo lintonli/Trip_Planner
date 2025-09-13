@@ -11,6 +11,5 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'trucker_backend.settings')
 # Get WSGI application
 application = get_wsgi_application()
 
-# Vercel handler
-def handler(request, context):
-    return application(request, context)
+# Vercel expects this variable name
+app = application
