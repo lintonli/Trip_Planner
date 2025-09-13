@@ -1,4 +1,4 @@
-from rest_framework import status, generics
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
@@ -9,38 +9,10 @@ from .serializers import (
 )
 from .services.route_service import RouteService
 from .services.hos_service import HOSComplianceService
-from datetime import datetime, date, time
+from datetime import datetime
 import logging
 
 logger = logging.getLogger(__name__)
-
-@api_view(['POST'])
-def test_geocode(request):
-    """
-    Test geocoding endpoint for debugging
-    """
-    location = request.data.get('location')
-    if not location:
-        return Response({'error': 'Location parameter required'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    route_service = RouteService()
-    coords = route_service.geocode_location(location)
-    
-    if coords:
-        return Response({
-            'location': location,
-            'coordinates': {
-                'latitude': coords[0],
-                'longitude': coords[1]
-            },
-            'success': True
-        })
-    else:
-        return Response({
-            'location': location,
-            'error': 'Could not geocode location',
-            'success': False
-        }, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def plan_trip(request):

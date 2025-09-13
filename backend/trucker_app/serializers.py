@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Trip, RouteSegment, Stop, DailyLog, LogEntry
+from .models import Trip, DailyLog, LogEntry
 
 class TripSerializer(serializers.ModelSerializer):
     class Meta:
@@ -11,16 +11,6 @@ class TripCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Trip
         fields = ['current_location', 'pickup_location', 'dropoff_location', 'current_cycle_used']
-
-class RouteSegmentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = RouteSegment
-        fields = '__all__'
-
-class StopSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Stop
-        fields = '__all__'
 
 class LogEntrySerializer(serializers.ModelSerializer):
     duration_hours = serializers.ReadOnlyField()
@@ -37,8 +27,6 @@ class DailyLogSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class TripDetailSerializer(serializers.ModelSerializer):
-    route_segments = RouteSegmentSerializer(many=True, read_only=True)
-    stops = StopSerializer(many=True, read_only=True)
     daily_logs = DailyLogSerializer(many=True, read_only=True)
     
     class Meta:

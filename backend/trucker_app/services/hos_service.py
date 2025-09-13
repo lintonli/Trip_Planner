@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, time
 from typing import List, Dict, Tuple
-from ..models import Trip, Stop, DailyLog, LogEntry
+from ..models import Trip, DailyLog, LogEntry
 
 class HOSComplianceService:
     """Service for Hours of Service compliance calculations"""

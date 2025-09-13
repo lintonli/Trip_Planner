@@ -21,49 +21,6 @@ class Trip(models.Model):
     def __str__(self):
         return f"Trip from {self.pickup_location} to {self.dropoff_location}"
 
-class RouteSegment(models.Model):
-    """Model for storing route segments"""
-    trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name='route_segments')
-    segment_order = models.IntegerField()
-    start_location = models.CharField(max_length=255)
-    end_location = models.CharField(max_length=255)
-    distance = models.FloatField()  # Distance in miles
-    duration = models.FloatField()  # Duration in hours
-    geometry = models.JSONField(null=True, blank=True)  # GeoJSON for route visualization
-    
-    class Meta:
-        ordering = ['segment_order']
-    
-    def __str__(self):
-        return f"Segment {self.segment_order}: {self.start_location} to {self.end_location}"
-
-class Stop(models.Model):
-    """Model for stops along the route (fuel, rest, pickup, delivery)"""
-    STOP_TYPES = [
-        ('pickup', 'Pickup'),
-        ('delivery', 'Delivery'),
-        ('fuel', 'Fuel Stop'),
-        ('rest', 'Rest Break'),
-        ('mandatory_break', 'Mandatory Break'),
-    ]
-    
-    trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name='stops')
-    stop_type = models.CharField(max_length=20, choices=STOP_TYPES)
-    location = models.CharField(max_length=255)
-    latitude = models.FloatField(null=True, blank=True)
-    longitude = models.FloatField(null=True, blank=True)
-    stop_order = models.IntegerField()
-    duration = models.FloatField()  # Duration in hours
-    arrival_time = models.DateTimeField(null=True, blank=True)
-    departure_time = models.DateTimeField(null=True, blank=True)
-    distance_from_start = models.FloatField(default=0.0)  # Cumulative distance from trip start
-    
-    class Meta:
-        ordering = ['stop_order']
-    
-    def __str__(self):
-        return f"{self.get_stop_type_display()} at {self.location}"
-
 class DailyLog(models.Model):
     """Model for daily log sheets following FMCSA requirements"""
     trip = models.ForeignKey(Trip, on_delete=models.CASCADE, related_name='daily_logs')
